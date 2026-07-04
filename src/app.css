@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lot-ok: #10b981;
+  --lot-warning: #f59e0b;
+  --lot-urgent: #ef4444;
+  --lot-expired: #64748b;
+}
+
+.theme-soft-light {
+  --soha-bg: #f0f4f0;
+  --soha-text: #1a2e1a;
+  --soha-card: #ffffff;
+  --soha-border: #d4e4d4;
+  --soha-sidebar: #e8f0e8;
+  --soha-input-bg: #f8faf8;
+  --soha-hover: #dceadc;
+  --soha-muted: #6b8a6b;
+  --soha-surface: #f5f9f5;
+  --soha-badge-bg: #e0f0e0;
+  --soha-badge-text: #2d5a2d;
+  --soha-accent: #3b82f6;
+  --soha-accent-light: #93c5fd;
+  --soha-accent-dark: #1d4ed8;
+  --soha-accent-soft: rgba(59, 130, 246, 0.12);
+}
+
+.theme-high-contrast-dark {
+  --soha-bg: #000000;
+  --soha-text: #ffffff;
+  --soha-card: #0a0a0a;
+  --soha-border: #333333;
+  --soha-sidebar: #0a0a0a;
+  --soha-input-bg: #111111;
+  --soha-hover: #1a1a1a;
+  --soha-muted: #888888;
+  --soha-surface: #111111;
+  --soha-badge-bg: #1a1a1a;
+  --soha-badge-text: #cccccc;
+  --soha-accent: #3b82f6;
+  --soha-accent-light: #93c5fd;
+  --soha-accent-dark: #1d4ed8;
+  --soha-accent-soft: rgba(59, 130, 246, 0.12);
+}
+
+.theme-sepia {
+  --soha-bg: #f5f0e8;
+  --soha-text: #2d2013;
+  --soha-card: #faf6ef;
+  --soha-border: #d4c8b4;
+  --soha-sidebar: #ede5d8;
+  --soha-input-bg: #faf6ef;
+  --soha-hover: #e8dcc8;
+  --soha-muted: #8a7a64;
+  --soha-surface: #f0e8da;
+  --soha-badge-bg: #ede0cc;
+  --soha-badge-text: #5a4a2e;
+  --soha-accent: #3b82f6;
+  --soha-accent-light: #93c5fd;
+  --soha-accent-dark: #1d4ed8;
+  --soha-accent-soft: rgba(59, 130, 246, 0.12);
+}
+
+.theme-night {
+  --soha-bg: #0f1117;
+  --soha-text: #e0e0e0;
+  --soha-card: #1a1d27;
+  --soha-border: #2a2d37;
+  --soha-sidebar: #12151e;
+  --soha-input-bg: #1e2130;
+  --soha-hover: #252838;
+  --soha-muted: #7a7d8a;
+  --soha-surface: #1e2130;
+  --soha-badge-bg: #252838;
+  --soha-badge-text: #b0b3c0;
+  --soha-accent: #3b82f6;
+  --soha-accent-light: #93c5fd;
+  --soha-accent-dark: #1d4ed8;
+  --soha-accent-soft: rgba(59, 130, 246, 0.12);
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--soha-bg);
+  color: var(--soha-text);
+  margin: 0;
+  padding: 0;
+}
+
+.badge-lot-ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.badge-lot-warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.badge-lot-urgent {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.badge-lot-expired {
+  background: var(--soha-badge-bg);
+  color: var(--soha-badge-text);
+}
