@@ -14,6 +14,7 @@
   ];
 
   let currentTheme = $state('night');
+  let isDark = $derived(currentTheme === 'night' || currentTheme === 'high-contrast-dark');
 
   function applyTheme(themeId: string) {
     const html = document.documentElement;
@@ -27,6 +28,12 @@
     currentTheme = themeId;
     try { localStorage.setItem('soha_theme', themeId); } catch {}
     expanded = false;
+  }
+
+  /** Quick toggle between light (midday) and dark (night) */
+  function quickToggle() {
+    const target = isDark ? 'midday' : 'night';
+    applyTheme(target);
   }
 
   function toggleExpanded() {
@@ -44,12 +51,26 @@
 </script>
 
 <div class="theme-toggle-wrapper">
+  <!-- Main toggle button: click toggles light/dark immediately -->
+  <button
+    onclick={quickToggle}
+    class="theme-toggle-btn"
+    title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+  >
+    {#if isDark}
+      <Icon name="sun" size={16} />
+    {:else}
+      <Icon name="moon" size={16} />
+    {/if}
+  </button>
+
+  <!-- Dropdown arrow for all 7 themes -->
   <button
     onclick={toggleExpanded}
-    class="theme-toggle-btn"
-    title="Cambiar tema"
+    class="theme-toggle-more"
+    title="Todos los temas"
   >
-    <Icon name={getThemeIcon(currentTheme)} size={16} />
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
   </button>
 
   {#if expanded}
@@ -78,15 +99,30 @@
 <style>
   .theme-toggle-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
   }
 
   .theme-toggle-btn {
-    width: 32px; height: 32px; border-radius: 0.5rem;
+    width: 32px; height: 32px; border-radius: 0.5rem 0 0 0.5rem;
     display: flex; align-items: center; justify-content: center;
     color: var(--soha-muted); border: none; background: none;
     cursor: pointer; transition: all 0.2s;
   }
   .theme-toggle-btn:hover {
+    color: var(--soha-accent);
+    background: var(--soha-hover);
+  }
+
+  .theme-toggle-more {
+    width: 16px; height: 32px; border-radius: 0 0.5rem 0.5rem 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--soha-muted); border: none; background: none;
+    cursor: pointer; transition: all 0.2s;
+    padding: 0 2px;
+  }
+  .theme-toggle-more:hover {
     color: var(--soha-accent);
     background: var(--soha-hover);
   }
