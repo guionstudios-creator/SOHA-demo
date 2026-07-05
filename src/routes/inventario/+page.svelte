@@ -3,11 +3,9 @@
   import { createMockContainer } from '$lib/mock/mock-container';
 
   const container = createMockContainer();
-
   let items: any[] = $state([]);
   let loading = $state(true);
   let searchQuery = $state('');
-  let selectedBlock = $state('');
   let selectedItem: any = $state(null);
 
   onMount(async () => {
@@ -17,11 +15,11 @@
 
   async function handleSearch() {
     loading = true;
-    items = await container.inventoryService.findAll({ search: searchQuery, bloque: selectedBlock });
+    items = await container.inventoryService.findAll({ search: searchQuery });
     loading = false;
   }
 
-  function getStatusColor(status: string): string {
+  function getLotBadgeClass(status: string): string {
     switch (status) {
       case 'ok': return 'badge-lot-ok';
       case 'warning': return 'badge-lot-warning';
@@ -31,134 +29,123 @@
     }
   }
 
-  function getStatusLabel(status: string): string {
+  function getLotStatusLabel(status: string): string {
     switch (status) {
       case 'ok': return 'OK';
       case 'warning': return 'Advertencia';
       case 'urgent': return 'Urgente';
       case 'expired': return 'Vencido';
-      default: return 'Desconocido';
+      default: return 'Vencido';
     }
   }
 
   function daysUntilExpiry(fecha: string): number {
-    const now = new Date();
-    const exp = new Date(fecha);
-    return Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.ceil((new Date(fecha).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   }
 </script>
 
-<svelte:head>
-  <title>SOHA Demo - Inventario</title>
-</svelte:head>
-
 <div class="space-y-6">
-  <h1 class="text-2xl font-semibold text-soha-text">Inventario FEFO</h1>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Inventario</h1>
+      <p class="text-sm mt-1" style="color: var(--soha-muted);">Stock actual con control FEFO por lote</p>
+    </div>
+  </div>
 
   <!-- Filters -->
-  <div class="flex flex-wrap gap-4">
+  <div class="flex flex-wrap gap-3">
     <input
       type="text"
       bind:value={searchQuery}
       oninput={handleSearch}
       placeholder="Buscar medicamento..."
-      class="flex-1 min-w-[200px] px-4 py-2 bg-soha-input-bg border border-soha-border rounded-lg text-soha-text placeholder-soha-muted focus:outline-none focus:ring-2 focus:ring-soha-accent"
+      class="input flex-1 min-w-[200px]"
     />
-    <select
-      bind:value={selectedBlock}
-      onchange={handleSearch}
-      class="px-4 py-2 bg-soha-input-bg border border-soha-border rounded-lg text-soha-text focus:outline-none focus:ring-2 focus:ring-soha-accent"
-    >
-      <option value="">Todos los bloques</option>
-      <option value="b001">Estante A - Analgésicos</option>
-      <option value="b002">Estante B - Antibióticos</option>
-      <option value="b003">Estante C - Cardiovasculares</option>
-      <option value="b004">Estante D - Controlados</option>
-      <option value="b005">Refrigerador - Biológicos</option>
-    </select>
   </div>
 
   {#if loading}
-    <div class="space-y-4">
+    <div class="space-y-3">
       {#each Array(5) as _}
-        <div class="h-32 bg-soha-card rounded animate-pulse"></div>
+        <div class="card animate-pulse h-20"></div>
       {/each}
     </div>
   {:else}
-    <!-- Items Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {#each items as item}
-        <div
-          class="bg-soha-card border border-soha-border rounded-lg p-4 cursor-pointer hover:border-soha-accent transition-colors"
-          onclick={() => selectedItem = selectedItem?.id === item.id ? null : item}
-          role="button"
-          tabindex="0"
-          onkeydown={(e) => e.key === 'Enter' && (selectedItem = selectedItem?.id === item.id ? null : item)}
-        >
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <h3 class="font-semibold text-soha-text">{item.nombreComercial}</h3>
-              <p class="text-sm text-soha-muted">{item.principioActivo} - {item.presentacion}</p>
-            </div>
-            <div class="text-right">
-              <div class="text-2xl font-bold text-soha-accent">{item.stockActual}</div>
-              <div class="text-xs text-soha-muted">unidades</div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-xs text-soha-muted">Mínimo: {item.stockMinimo}</span>
-            {#if item.stockActual < item.stockMinimo}
-              <span class="text-xs text-red-500 font-medium">Stock bajo</span>
-            {/if}
-          </div>
-
-          <!-- Lot FEFO badges -->
-          <div class="flex flex-wrap gap-2">
-            {#each item.lotesDetalle.slice(0, 3) as lot}
-              <span class="px-2 py-1 rounded text-xs font-medium {getStatusColor(lot.status)}">
-                {lot.numeroLote} - {lot.cantidadActual}u
-                {#if lot.status !== 'expired'}
-                  ({daysUntilExpiry(lot.fechaVencimiento)}d)
+    <!-- Table -->
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Medicamento</th>
+            <th>Principio Activo</th>
+            <th>Stock</th>
+            <th>Mínimo</th>
+            <th>Lotes</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each items as item}
+            <tr
+              class="cursor-pointer"
+              onclick={() => selectedItem = selectedItem?.id === item.id ? null : item}
+            >
+              <td class="font-medium">{item.nombreComercial}</td>
+              <td>{item.principioActivo}</td>
+              <td>
+                <span class="font-bold" style="color: item.stockActual < item.stockMinimo ? 'var(--lot-urgent)' : 'var(--lot-ok)';">
+                  {item.stockActual}
+                </span>
+              </td>
+              <td>{item.stockMinimo}</td>
+              <td>{item.lotesDetalle.length}</td>
+              <td>
+                {#if item.stockActual < item.stockMinimo}
+                  <span class="badge-lot-urgent">Stock bajo</span>
+                {:else if item.lotesDetalle.some((l: any) => l.status === 'urgent')}
+                  <span class="badge-lot-urgent">Crítico</span>
+                {:else if item.lotesDetalle.some((l: any) => l.status === 'warning')}
+                  <span class="badge-lot-warning">Atención</span>
+                {:else}
+                  <span class="badge-lot-ok">Normal</span>
                 {/if}
-              </span>
-            {/each}
-            {#if item.lotesDetalle.length > 3}
-              <span class="px-2 py-1 rounded text-xs text-soha-muted bg-soha-surface">
-                +{item.lotesDetalle.length - 3} más
-              </span>
-            {/if}
-          </div>
+              </td>
+            </tr>
 
-          <!-- Expanded lot details -->
-          {#if selectedItem?.id === item.id}
-            <div class="mt-4 pt-4 border-t border-soha-border">
-              <h4 class="text-sm font-medium text-soha-text mb-2">Detalle de Lotes (FEFO)</h4>
-              <div class="space-y-2">
-                {#each item.lotesDetalle as lot}
-                  <div class="flex items-center justify-between p-2 bg-soha-surface rounded">
-                    <div class="flex items-center gap-2">
-                      <span class="px-2 py-0.5 rounded text-xs font-medium {getStatusColor(lot.status)}">
-                        {getStatusLabel(lot.status)}
-                      </span>
-                      <span class="text-sm text-soha-text">{lot.numeroLote}</span>
-                    </div>
-                    <div class="text-right">
-                      <span class="text-sm font-mono text-soha-text">{lot.cantidadActual}/{lot.cantidadOriginal}</span>
-                      <span class="text-xs text-soha-muted ml-2">Vence: {lot.fechaVencimiento}</span>
+            <!-- Expanded lot details -->
+            {#if selectedItem?.id === item.id}
+              <tr>
+                <td colspan="6" class="!p-0">
+                  <div class="p-4" style="background: var(--soha-surface);">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--soha-muted);">Detalle de Lotes (FEFO)</h4>
+                    <div class="grid gap-2">
+                      {#each item.lotesDetalle as lot}
+                        <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--soha-card); border: 1px solid var(--soha-border);">
+                          <div class="flex items-center gap-3">
+                            <span class={getLotBadgeClass(lot.status)}>{getLotStatusLabel(lot.status)}</span>
+                            <span class="font-medium text-sm" style="color: var(--soha-text);">{lot.numeroLote}</span>
+                          </div>
+                          <div class="flex items-center gap-4 text-sm">
+                            <span class="font-mono" style="color: var(--soha-text);">{lot.cantidadActual}/{lot.cantidadOriginal} u</span>
+                            <span style="color: var(--soha-muted);">Vence: {lot.fechaVencimiento}</span>
+                            {#if lot.status !== 'expired'}
+                              <span style="color: var(--lot-warning);">({daysUntilExpiry(lot.fechaVencimiento)}d)</span>
+                            {/if}
+                          </div>
+                        </div>
+                      {/each}
                     </div>
                   </div>
-                {/each}
-              </div>
-            </div>
-          {/if}
-        </div>
-      {/each}
+                </td>
+              </tr>
+            {/if}
+          {/each}
+        </tbody>
+      </table>
     </div>
 
     {#if items.length === 0}
-      <div class="text-center py-12 text-soha-muted">
-        No se encontraron medicamentos con los filtros aplicados.
+      <div class="card text-center py-12" style="color: var(--soha-muted);">
+        No se encontraron medicamentos.
       </div>
     {/if}
   {/if}

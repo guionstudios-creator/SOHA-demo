@@ -3,11 +3,11 @@
   import { createMockContainer } from '$lib/mock/mock-container';
 
   const container = createMockContainer();
-
   let dispatches: any[] = $state([]);
   let loading = $state(true);
-  let selectedDate = $state('');
   let selectedService = $state('');
+
+  const services = ['Emergencia', 'Consulta Externa', 'Hospitalización', 'Quirófano', 'UCI', 'Pediatría'];
 
   onMount(async () => {
     dispatches = await container.dispatchService.findAll();
@@ -16,103 +16,69 @@
 
   async function handleFilter() {
     loading = true;
-    dispatches = await container.dispatchService.findAll({
-      fecha: selectedDate || undefined,
-      servicio: selectedService || undefined
-    });
+    dispatches = await container.dispatchService.findAll({ servicio: selectedService || undefined });
     loading = false;
   }
 
-  function getEstadoColor(estado: string): string {
+  function getEstadoClass(estado: string): string {
     switch (estado) {
-      case 'completada': return 'text-green-500 bg-green-500/10';
-      case 'pendiente': return 'text-yellow-500 bg-yellow-500/10';
-      case 'cancelada': return 'text-red-500 bg-red-500/10';
-      default: return 'text-soha-muted bg-soha-surface';
+      case 'completada': return 'badge-lot-ok';
+      case 'pendiente': return 'badge-lot-warning';
+      case 'cancelada': return 'badge-lot-urgent';
+      default: return 'badge-lot-expired';
     }
   }
-
-  const services = ['Emergencia', 'Consulta Externa', 'Hospitalización', 'Quirófano', 'UCI', 'Pediatría'];
 </script>
 
-<svelte:head>
-  <title>SOHA Demo - Despachos</title>
-</svelte:head>
-
 <div class="space-y-6">
-  <h1 class="text-2xl font-semibold text-soha-text">Despachos</h1>
+  <div>
+    <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Despachos</h1>
+    <p class="text-sm mt-1" style="color: var(--soha-muted);">Registro de salidas con códigos de trazabilidad</p>
+  </div>
 
-  <!-- Filters -->
-  <div class="flex flex-wrap gap-4">
-    <input
-      type="date"
-      bind:value={selectedDate}
-      onchange={handleFilter}
-      class="px-4 py-2 bg-soha-input-bg border border-soha-border rounded-lg text-soha-text focus:outline-none focus:ring-2 focus:ring-soha-accent"
-    />
-    <select
-      bind:value={selectedService}
-      onchange={handleFilter}
-      class="px-4 py-2 bg-soha-input-bg border border-soha-border rounded-lg text-soha-text focus:outline-none focus:ring-2 focus:ring-soha-accent"
-    >
+  <div class="flex flex-wrap gap-3">
+    <select bind:value={selectedService} onchange={handleFilter} class="input w-auto">
       <option value="">Todos los servicios</option>
-      {#each services as service}
-        <option value={service}>{service}</option>
+      {#each services as s}
+        <option value={s}>{s}</option>
       {/each}
     </select>
   </div>
 
   {#if loading}
-    <div class="space-y-4">
+    <div class="space-y-3">
       {#each Array(5) as _}
-        <div class="h-24 bg-soha-card rounded animate-pulse"></div>
+        <div class="card animate-pulse h-24"></div>
       {/each}
     </div>
   {:else}
-    <!-- Dispatches List -->
-    <div class="space-y-4">
+    <div class="space-y-3">
       {#each dispatches as dispatch}
-        <div class="bg-soha-card border border-soha-border rounded-lg p-4">
+        <div class="card">
           <div class="flex flex-wrap justify-between items-start gap-4">
-            <div class="flex-1 min-w-[200px]">
+            <div>
               <div class="flex items-center gap-3 mb-2">
-                <span class="font-mono text-sm text-soha-accent">{dispatch.codigoTrazabilidad}</span>
-                <span class="px-2 py-0.5 rounded text-xs font-medium {getEstadoColor(dispatch.estado)}">
-                  {dispatch.estado}
-                </span>
+                <span class="font-mono text-sm font-bold" style="color: var(--soha-accent);">{dispatch.codigoTrazabilidad}</span>
+                <span class={getEstadoClass(dispatch.estado)}>{dispatch.estado}</span>
               </div>
-              <div class="text-sm text-soha-muted">
-                <span>{dispatch.fecha}</span>
-                <span class="mx-2">•</span>
-                <span>{dispatch.servicio}</span>
-                <span class="mx-2">•</span>
-                <span>{dispatch.usuario}</span>
+              <div class="text-sm" style="color: var(--soha-muted);">
+                {dispatch.fecha} · {dispatch.servicio} · {dispatch.usuario}
               </div>
             </div>
             <div class="text-right">
-              <div class="text-lg font-bold text-soha-text">{dispatch.items.length}</div>
-              <div class="text-xs text-soha-muted">items</div>
+              <div class="text-lg font-bold" style="color: var(--soha-text);">{dispatch.items.length}</div>
+              <div class="text-xs" style="color: var(--soha-muted);">items</div>
             </div>
           </div>
-
-          <!-- Items -->
-          <div class="mt-3 pt-3 border-t border-soha-border">
-            <div class="flex flex-wrap gap-2">
-              {#each dispatch.items as item}
-                <span class="px-2 py-1 bg-soha-surface rounded text-xs text-soha-text">
-                  {item.nombreMedicamento} × {item.cantidad}
-                </span>
-              {/each}
-            </div>
+          <div class="mt-3 pt-3 flex flex-wrap gap-2" style="border-top: 1px solid var(--soha-border);">
+            {#each dispatch.items as item}
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium" style="background: var(--soha-surface); color: var(--soha-text);">
+                {item.nombreMedicamento} × {item.cantidad}
+              </span>
+            {/each}
           </div>
         </div>
       {/each}
     </div>
-
-    {#if dispatches.length === 0}
-      <div class="text-center py-12 text-soha-muted">
-        No se encontraron despachos con los filtros aplicados.
-      </div>
-    {/if}
   {/if}
 </div>

@@ -1,121 +1,168 @@
 <script lang="ts">
   import '../app.css';
-  import { setContext, onMount } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
 
   let { children } = $props();
-  let currentTheme = $state('night');
-  let sidebarCollapsed = $state(false);
+  let mobileMenuOpen = $state(false);
+  let isExpanded = $state(true);
+  let layoutReady = $state(false);
+
+  const rutaActual = $derived($page.url.pathname);
+
+  const navOperativo = [
+    { href: '/', icon: '📊', label: 'Estadísticas' },
+    { href: '/inventario', icon: '📦', label: 'Inventario' },
+    { href: '/despachos', icon: '🛒', label: 'Salida Rápida' },
+    { href: '/despachos', icon: '↩️', label: 'Devoluciones' },
+    { href: '/historial', icon: '🕐', label: 'Historial' },
+    { href: '/reportes', icon: '📄', label: 'Reportes' },
+  ];
+
+  const navAdmin = [
+    { href: '/inventario', icon: '📁', label: 'Ubicaciones' },
+    { href: '/catalogo', icon: '📋', label: 'Catálogo' },
+    { href: '/usuarios', icon: '👥', label: 'Usuarios' },
+    { href: '/auditoria', icon: '🛡️', label: 'Auditoría' },
+    { href: '/configuracion', icon: '⚙️', label: 'Admin Tool' }
+  ];
 
   onMount(() => {
-    document.documentElement.className = `theme-${currentTheme} ${currentTheme.includes('dark') || currentTheme === 'night' ? 'dark' : ''}`;
+    try {
+      const saved = localStorage.getItem('soha_sidebar_expanded');
+      if (saved !== null) isExpanded = saved === 'true';
+    } catch {}
+    layoutReady = true;
   });
 
-  function setTheme(theme: string) {
-    currentTheme = theme;
-    document.documentElement.className = `theme-${theme} ${theme.includes('dark') || theme === 'night' ? 'dark' : ''}`;
+  function toggleExpand() {
+    isExpanded = !isExpanded;
+    try { localStorage.setItem('soha_sidebar_expanded', String(isExpanded)); } catch {}
+  }
+
+  function isRouteActive(path: string) {
+    return rutaActual === path;
   }
 </script>
 
-<div class="min-h-screen flex">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-soha-sidebar border-r border-soha-border flex flex-col transition-all duration-300 {sidebarCollapsed ? 'w-16' : 'w-64'}">
-    <!-- Logo -->
-    <div class="p-4 border-b border-soha-border">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-soha-accent rounded-lg flex items-center justify-center">
-          <span class="text-white font-bold text-sm">S</span>
+{#if !layoutReady}
+  <div class="fixed inset-0 bg-slate-50 flex flex-col items-center justify-center gap-4">
+    <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+    <p class="text-slate-500 font-medium animate-pulse">Iniciando SOHA...</p>
+  </div>
+{:else}
+  <div class="layout-root">
+    <!-- Sidebar -->
+    <aside class="sb-root" class:sb-expanded={isExpanded} class:sb-collapsed={!isExpanded}>
+      <!-- Header -->
+      <div class="sb-header">
+        <a href="/" class="sb-logo-wrapper flex items-center gap-0 rounded-xl transition-colors" style="padding: 0.5rem;">
+          <div class="sb-logo-box">S</div>
+          {#if isExpanded}
+            <div class="sb-label-slide sb-label-visible">
+              <div class="sb-logo-text">
+                <span class="sb-logo-title">SOHA</span>
+                <span class="sb-logo-sub">Inventario</span>
+              </div>
+            </div>
+          {/if}
+        </a>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sb-nav">
+        {#each navOperativo as item}
+          <a
+            href={item.href}
+            class="sb-link"
+            class:sb-link-active={isRouteActive(item.href)}
+          >
+            <div class="sb-icon-box" class:sb-link-active={isRouteActive(item.href)}>
+              <span class="text-lg">{item.icon}</span>
+            </div>
+            {#if isExpanded}
+              <div class="sb-label-slide sb-label-visible">
+                <span class="sb-link-label">{item.label}</span>
+              </div>
+            {/if}
+          </a>
+        {/each}
+
+        <!-- Admin Divider -->
+        <div class="sb-divider">
+          <div class="sb-divider-line"></div>
+          {#if isExpanded}
+            <div class="sb-label-slide sb-label-visible">
+              <span class="sb-divider-text">Admin Console</span>
+            </div>
+          {/if}
         </div>
-        {#if !sidebarCollapsed}
-          <span class="font-semibold text-soha-text">SOHA</span>
-        {/if}
+
+        {#each navAdmin as item}
+          <a
+            href={item.href}
+            class="sb-link"
+            class:sb-link-active={isRouteActive(item.href)}
+          >
+            <div class="sb-icon-box">
+              <span class="text-lg">{item.icon}</span>
+            </div>
+            {#if isExpanded}
+              <div class="sb-label-slide sb-label-visible">
+                <span class="sb-link-label">{item.label}</span>
+              </div>
+            {/if}
+          </a>
+        {/each}
+      </nav>
+
+      <!-- Footer Profile -->
+      <div class="sb-footer">
+        <div class="sb-profile-card">
+          <div class="sb-profile-main">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">AD</div>
+            {#if isExpanded}
+              <div class="sb-label-slide sb-label-visible">
+                <div class="sb-profile-info">
+                  <p class="sb-profile-name">Admin Demo</p>
+                  <p class="sb-profile-role">administrador</p>
+                </div>
+              </div>
+            {/if}
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="sb-action-btn sb-action-btn-expand" onclick={toggleExpand} title={isExpanded ? 'Contraer' : 'Expandir'}>
+              {isExpanded ? '◀' : '▶'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Navigation -->
-    <nav class="flex-1 p-2 space-y-1">
-      <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-soha-muted hover:bg-soha-hover hover:text-soha-text transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-        </svg>
-        {#if !sidebarCollapsed}
-          <span>Dashboard</span>
-        {/if}
-      </a>
-
-      <a href="/inventario" class="flex items-center gap-3 px-3 py-2 rounded-lg text-soha-muted hover:bg-soha-hover hover:text-soha-text transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        {#if !sidebarCollapsed}
-          <span>Inventario</span>
-        {/if}
-      </a>
-
-      <a href="/despachos" class="flex items-center gap-3 px-3 py-2 rounded-lg text-soha-muted hover:bg-soha-hover hover:text-soha-text transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-        </svg>
-        {#if !sidebarCollapsed}
-          <span>Despachos</span>
-        {/if}
-      </a>
-
-      <a href="/auditoria" class="flex items-center gap-3 px-3 py-2 rounded-lg text-soha-muted hover:bg-soha-hover hover:text-soha-text transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        {#if !sidebarCollapsed}
-          <span>Auditoría</span>
-        {/if}
-      </a>
-
-      <a href="/catalogo" class="flex items-center gap-3 px-3 py-2 rounded-lg text-soha-muted hover:bg-soha-hover hover:text-soha-text transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-        </svg>
-        {#if !sidebarCollapsed}
-          <span>Catálogo</span>
-        {/if}
-      </a>
-    </nav>
-
-    <!-- Theme Switcher -->
-    <div class="p-4 border-t border-soha-border">
-      <div class="flex gap-2">
-        <button
-          onclick={() => setTheme('night')}
-          class="w-6 h-6 rounded-full bg-[#0f1117] border-2 {currentTheme === 'night' ? 'border-soha-accent' : 'border-soha-border'}"
-          title="Night"
-        ></button>
-        <button
-          onclick={() => setTheme('soft-light')}
-          class="w-6 h-6 rounded-full bg-[#f0f4f0] border-2 {currentTheme === 'soft-light' ? 'border-soha-accent' : 'border-soha-border'}"
-          title="Soft Light"
-        ></button>
-        <button
-          onclick={() => setTheme('high-contrast-dark')}
-          class="w-6 h-6 rounded-full bg-[#000000] border-2 {currentTheme === 'high-contrast-dark' ? 'border-soha-accent' : 'border-soha-border'}"
-          title="High Contrast Dark"
-        ></button>
-        <button
-          onclick={() => setTheme('sepia')}
-          class="w-6 h-6 rounded-full bg-[#f5f0e8] border-2 {currentTheme === 'sepia' ? 'border-soha-accent' : 'border-soha-border'}"
-          title="Sepia"
-        ></button>
+    <!-- Main Content -->
+    <div class="layout-main-wrapper">
+      <!-- Desktop status strip -->
+      <div
+        class="hidden lg:flex items-center justify-end gap-2 px-6 py-2 border-b shrink-0"
+        style="background: color-mix(in srgb, var(--soha-bg) 60%, transparent); border-color: var(--soha-border);"
+      >
+        <span class="text-xs text-[var(--soha-muted)]">🟢 Conectado</span>
+        <span class="text-xs text-[var(--soha-muted)]">|</span>
+        <span class="text-xs text-[var(--soha-muted)]">Hospital Demo Central</span>
       </div>
-    </div>
-  </aside>
 
-  <!-- Main Content -->
-  <main class="flex-1 min-w-0">
-    <!-- Demo Banner -->
-    <div class="bg-amber-500/20 border-b border-amber-500/30 px-4 py-2 text-center text-sm font-mono text-amber-400">
-      ⚠️ DEMO — Todos los datos son ficticios. No representa información real de pacientes o instituciones.
-    </div>
+      <!-- Content -->
+      <main class="flex-1 overflow-y-auto w-full relative p-6 lg:p-8">
+        <!-- Demo Banner -->
+        <div class="mb-6 px-4 py-3 rounded-lg border text-sm font-medium flex items-center gap-3"
+          style="background: color-mix(in srgb, var(--lot-warning) 10%, transparent); border-color: color-mix(in srgb, var(--lot-warning) 30%, transparent); color: var(--lot-warning);">
+          <span>⚠️</span>
+          <span>DEMO — Todos los datos son ficticios. No representa información real de pacientes o instituciones.</span>
+        </div>
 
-    <div class="p-6">
-      {@render children()}
+        {@render children()}
+      </main>
     </div>
-  </main>
-</div>
+  </div>
+{/if}

@@ -3,130 +3,170 @@
   import { createMockContainer } from '$lib/mock/mock-container';
 
   const container = createMockContainer();
-
-  let dashboardData: any = $state(null);
-  let loading = $state(true);
+  let data: any = $state(null);
+  let visible = $state(false);
 
   onMount(async () => {
-    dashboardData = await container.dashboardAnalyticsService.getDashboardData();
-    loading = false;
+    data = await container.dashboardAnalyticsService.getDashboardData();
+    setTimeout(() => visible = true, 100);
   });
 </script>
 
-<svelte:head>
-  <title>SOHA Demo - Dashboard</title>
-</svelte:head>
-
-{#if loading}
-  <div class="space-y-6">
-    <div class="h-8 bg-soha-card rounded w-1/3 animate-pulse"></div>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {#each Array(4) as _}
-        <div class="h-24 bg-soha-card rounded animate-pulse"></div>
-      {/each}
-    </div>
-    <div class="h-64 bg-soha-card rounded animate-pulse"></div>
+{#if !data}
+  <div class="space-y-4">
+    {#each Array(4) as _}
+      <div class="card animate-pulse h-24"></div>
+    {/each}
   </div>
-{:else if dashboardData}
-  <div class="space-y-6">
-    <h1 class="text-2xl font-semibold text-soha-text">Dashboard</h1>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Total Medicamentos</div>
-        <div class="text-3xl font-bold text-soha-accent">{dashboardData.totalMedicamentos}</div>
-      </div>
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Stock Total</div>
-        <div class="text-3xl font-bold text-green-500">{dashboardData.totalUnidades.toLocaleString()}</div>
-      </div>
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Lotes Críticos</div>
-        <div class="text-3xl font-bold text-red-500">{dashboardData.lotesUrgentes}</div>
-      </div>
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Despachos Hoy</div>
-        <div class="text-3xl font-bold text-purple-500">{dashboardData.despachosHoy}</div>
-      </div>
+{:else}
+  <div class="space-y-6" class:opacity-0={!visible} class:opacity-100={visible} style="transition: opacity 0.3s ease;">
+    <!-- Hospital Name -->
+    <div>
+      <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Estadísticas</h1>
+      <p class="text-sm mt-1" style="color: var(--soha-muted);">Hospital Demo Central — Dashboard de inventario</p>
     </div>
 
-    <!-- Lot Status Distribution -->
-    <div class="bg-soha-card border border-soha-border rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-soha-text mb-4">Estado de Lotes (FEFO)</h2>
-      <div class="flex gap-4">
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-green-500"></span>
-          <span class="text-sm text-soha-muted">OK (&gt;90 días): {dashboardData.lotesOk}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-          <span class="text-sm text-soha-muted">Advertencia (30-90 días): {dashboardData.lotesAdvertencia}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-red-500"></span>
-          <span class="text-sm text-soha-muted">Urgente (&lt;30 días): {dashboardData.lotesUrgentes}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-gray-500"></span>
-          <span class="text-sm text-soha-muted">Vencidos: {dashboardData.lotesVencidos}</span>
-        </div>
-      </div>
-
-      <!-- Visual bar -->
-      <div class="mt-4 h-4 rounded-full overflow-hidden flex">
-        {#if dashboardData.totalLotes > 0}
-          <div class="bg-green-500" style="width: {(dashboardData.lotesOk / dashboardData.totalLotes) * 100}%"></div>
-          <div class="bg-yellow-500" style="width: {(dashboardData.lotesAdvertencia / dashboardData.totalLotes) * 100}%"></div>
-          <div class="bg-red-500" style="width: {(dashboardData.lotesUrgentes / dashboardData.totalLotes) * 100}%"></div>
-          <div class="bg-gray-500" style="width: {(dashboardData.lotesVencidos / dashboardData.totalLotes) * 100}%"></div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Service Distribution -->
-    <div class="bg-soha-card border border-soha-border rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-soha-text mb-4">Despachos por Servicio</h2>
-      <div class="space-y-3">
-        {#each Object.entries(dashboardData.serviceDistribution) as [servicio, cantidad]}
-          {@const maxCant = Math.max(...Object.values(dashboardData.serviceDistribution) as number[])}
-          <div class="flex items-center gap-4">
-            <span class="w-32 text-sm text-soha-muted">{servicio}</span>
-            <div class="flex-1 h-6 bg-soha-surface rounded overflow-hidden">
-              <div class="h-full bg-soha-accent rounded" style="width: {((cantidad as number) / maxCant) * 100}%"></div>
-            </div>
-            <span class="w-12 text-right text-sm font-mono text-soha-text">{cantidad}</span>
+    <!-- Stat Cards Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total Medicamentos -->
+      <div class="card group hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--soha-accent-soft);">
+            <span class="text-lg">💊</span>
           </div>
-        {/each}
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Medicamentos</span>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--soha-accent);">{data.totalMedicamentos}</div>
+      </div>
+
+      <!-- Stock Total -->
+      <div class="card group hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--lot-ok) 15%, transparent);">
+            <span class="text-lg">📦</span>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Stock Total</span>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--lot-ok);">{data.totalUnidades.toLocaleString()}</div>
+      </div>
+
+      <!-- Lotes Críticos -->
+      <div class="card group hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--lot-urgent) 15%, transparent);">
+            <span class="text-lg">⚠️</span>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Lotes Críticos</span>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--lot-urgent);">{data.lotesUrgentes}</div>
+      </div>
+
+      <!-- Despachos Hoy -->
+      <div class="card group hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--soha-accent) 15%, transparent);">
+            <span class="text-lg">🛒</span>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Despachos Hoy</span>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--soha-accent);">{data.despachosHoy}</div>
       </div>
     </div>
 
-    <!-- Recent Alerts -->
-    <div class="bg-soha-card border border-soha-border rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-soha-text mb-4">Alertas Recientes</h2>
+    <!-- FEFO Status + Service Distribution -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- FEFO Status -->
+      <div class="card">
+        <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--soha-muted);">Estado de Lotes (FEFO)</h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background: var(--lot-ok);"></span>
+              <span class="text-sm" style="color: var(--soha-text);">OK (&gt;90 días)</span>
+            </div>
+            <span class="font-bold" style="color: var(--lot-ok);">{data.lotesOk}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background: var(--lot-warning);"></span>
+              <span class="text-sm" style="color: var(--soha-text);">Advertencia (30-90 días)</span>
+            </div>
+            <span class="font-bold" style="color: var(--lot-warning);">{data.lotesAdvertencia}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background: var(--lot-urgent);"></span>
+              <span class="text-sm" style="color: var(--soha-text);">Urgente (&lt;30 días)</span>
+            </div>
+            <span class="font-bold" style="color: var(--lot-urgent);">{data.lotesUrgentes}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background: var(--lot-expired);"></span>
+              <span class="text-sm" style="color: var(--soha-text);">Vencidos</span>
+            </div>
+            <span class="font-bold" style="color: var(--lot-expired);">{data.lotesVencidos}</span>
+          </div>
+        </div>
+        <!-- Visual bar -->
+        <div class="mt-4 h-3 rounded-full overflow-hidden flex" style="background: var(--soha-surface);">
+          {#if data.totalLotes > 0}
+            <div style="width: {(data.lotesOk / data.totalLotes) * 100}%; background: var(--lot-ok);"></div>
+            <div style="width: {(data.lotesAdvertencia / data.totalLotes) * 100}%; background: var(--lot-warning);"></div>
+            <div style="width: {(data.lotesUrgentes / data.totalLotes) * 100}%; background: var(--lot-urgent);"></div>
+            <div style="width: {(data.lotesVencidos / data.totalLotes) * 100}%; background: var(--lot-expired);"></div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Service Distribution -->
+      <div class="card">
+        <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--soha-muted);">Despachos por Servicio</h3>
+        <div class="space-y-3">
+          {#each Object.entries(data.serviceDistribution) as [servicio, cantidad]}
+            {@const maxCant = Math.max(...Object.values(data.serviceDistribution) as number[])}
+            <div class="flex items-center gap-3">
+              <span class="w-32 text-sm truncate" style="color: var(--soha-muted);">{servicio}</span>
+              <div class="flex-1 h-6 rounded overflow-hidden" style="background: var(--soha-surface);">
+                <div class="h-full rounded" style="width: {((cantidad as number) / maxCant) * 100}%; background: var(--soha-accent);"></div>
+              </div>
+              <span class="w-12 text-right text-sm font-mono font-bold" style="color: var(--soha-text);">{cantidad}</span>
+            </div>
+          {/each}
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="card">
+      <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--soha-muted);">Alertas Recientes</h3>
       <div class="space-y-2">
-        {#each dashboardData.recentAlerts as alert}
-          <div class="flex items-center gap-3 p-3 rounded-lg {alert.type === 'urgent' ? 'bg-red-500/10 border border-red-500/20' : 'bg-yellow-500/10 border border-yellow-500/20'}">
-            <span class="text-lg">{alert.type === 'urgent' ? '🔴' : '⚠️'}</span>
-            <span class="text-sm {alert.type === 'urgent' ? 'text-red-400' : 'text-yellow-400'}">{alert.message}</span>
+        {#each data.recentAlerts as alert}
+          <div class="flex items-center gap-3 p-3 rounded-lg"
+            style={alert.type === 'urgent'
+              ? 'background: color-mix(in srgb, var(--lot-urgent) 8%, transparent); border: 1px solid color-mix(in srgb, var(--lot-urgent) 30%, transparent);'
+              : 'background: color-mix(in srgb, var(--lot-warning) 8%, transparent); border: 1px solid color-mix(in srgb, var(--lot-warning) 30%, transparent);'}
+          >
+            <span>{alert.type === 'urgent' ? '🔴' : '⚠️'}</span>
+            <span class="text-sm" style="color: {alert.type === 'urgent' ? 'var(--lot-urgent)' : 'var(--lot-warning)'};">{alert.message}</span>
           </div>
         {/each}
       </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Total Movimientos</div>
-        <div class="text-2xl font-bold text-soha-text">{dashboardData.movimientosTotales}</div>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="card text-center">
+        <div class="text-2xl font-bold" style="color: var(--soha-text);">{data.movimientosTotales}</div>
+        <div class="text-xs mt-1" style="color: var(--soha-muted);">Total Movimientos</div>
       </div>
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Despachos Totales</div>
-        <div class="text-2xl font-bold text-soha-text">{dashboardData.despachosTotales}</div>
+      <div class="card text-center">
+        <div class="text-2xl font-bold" style="color: var(--soha-text);">{data.despachosTotales}</div>
+        <div class="text-xs mt-1" style="color: var(--soha-muted);">Despachos Totales</div>
       </div>
-      <div class="bg-soha-card border border-soha-border rounded-lg p-4">
-        <div class="text-sm text-soha-muted">Medicamentos con Stock Bajo</div>
-        <div class="text-2xl font-bold text-orange-500">{dashboardData.lowStockCount}</div>
+      <div class="card text-center">
+        <div class="text-2xl font-bold" style="color: var(--lot-warning);">{data.lowStockCount}</div>
+        <div class="text-xs mt-1" style="color: var(--soha-muted);">Stock Bajo</div>
       </div>
     </div>
   </div>
