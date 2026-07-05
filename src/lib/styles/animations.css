@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════
+   SOHA Demo — Sistema de Animaciones
+   Portado de SOHA V0.1 (animations.css)
+   ═══════════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+  --anim-fast: 150ms;
+  --anim-normal: 300ms;
+  --anim-slow: 500ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Keyframes ── */
+
+/* Pulse de opacidad (loading, badges) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Shimmer para skeletons */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Stagger In para listas */
+@keyframes staggerIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glass reveal */
+@keyframes glassReveal {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Checkmark draw */
+@keyframes checkDraw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Shake para errores */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Fade in con translateY para páginas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Clases de utilidad ── */
+
+/* Page enter */
+.page-enter {
+  animation: fadeInUp var(--anim-slow, 0.5s) var(--ease-out, ease-out) forwards;
+}
+
+/* Hover lift */
+.hover-lift {
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+}
+
+/* Shimmer container */
+.shimmer-container {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Stagger items */
+.stagger-container > * {
+  opacity: 0;
+  animation: staggerIn 0.3s var(--ease-out) forwards;
+}
+.stagger-container > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-container > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-container > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-container > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-container > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-container > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-container > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-container > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-container > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-container > *:nth-child(10) { animation-delay: 0.5s; }
+
+/* Loading pulse */
+.loading-pulse {
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+/* Glass reveal */
+.glass-reveal {
+  animation: glassReveal 0.6s var(--ease-out) forwards;
+}
+
+/* Checkmark */
+.checkmark-draw {
+  stroke-dasharray: 24;
+  animation: checkDraw 0.5s ease-out forwards;
+}
+
+/* Shake */
+.shake {
+  animation: shake 0.4s var(--ease-in-out);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .hover-lift:hover {
+    transform: none !important;
+  }
+}

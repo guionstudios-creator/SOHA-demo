@@ -1,103 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+@import './lib/styles/animations.css';
+@import './lib/styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --primary-500: #10b981;
-    --lot-ok: #10b981;
-    --lot-warning: #f59e0b;
-    --lot-urgent: #ef4444;
-    --lot-expired: #64748b;
-
-    --soha-bg: #ffffff;
-    --soha-text: #0f172a;
-    --soha-card: #f8fafc;
-    --soha-border: #e2e8f0;
-    --soha-sidebar: #ffffff;
-    --soha-input-bg: #ffffff;
-    --soha-hover: #f1f5f9;
-    --soha-muted: #64748b;
-    --soha-surface: #f8fafc;
-    --soha-badge-bg: #f1f5f9;
-    --soha-badge-text: #475569;
-    --soha-accent: #3b82f6;
-    --soha-accent-light: #60a5fa;
-    --soha-accent-dark: #2563eb;
-    --soha-accent-soft: rgba(59, 130, 246, 0.1);
-    --stat-glow-opacity: 0.15;
-    --radius: 0.75rem;
-  }
-
-  .theme-night {
-    --soha-bg: #0f172a;
-    --soha-text: #f1f5f9;
-    --soha-card: #1e293b;
-    --soha-border: #334155;
-    --soha-sidebar: #0b1221;
-    --soha-input-bg: #1e293b;
-    --soha-hover: #334155;
-    --soha-muted: #94a3b8;
-    --soha-surface: #1e293b;
-    --soha-badge-bg: #334155;
-    --soha-badge-text: #cbd5e1;
-    --stat-glow-opacity: 0.12;
-  }
-
-  .theme-soft-light {
-    --soha-bg: #f1f4f1;
-    --soha-text: #2e3a33;
-    --soha-card: #fafcfa;
-    --soha-border: #cde2d6;
-    --soha-sidebar: #e8efea;
-    --soha-input-bg: #fafcfa;
-    --soha-hover: #dfebe4;
-    --soha-muted: #6b8576;
-    --soha-surface: #f1f4f1;
-    --soha-badge-bg: #e0eae4;
-    --soha-badge-text: #4f6156;
-    --stat-glow-opacity: 0.15;
-  }
-
-  .theme-sepia {
-    --soha-bg: #f4ecd8;
-    --soha-text: #5b4636;
-    --soha-card: #faf4e6;
-    --soha-border: #dbcdb4;
-    --soha-sidebar: #e3d7bd;
-    --soha-input-bg: #faf4e6;
-    --soha-hover: #ebe0c9;
-    --soha-muted: #8f7664;
-    --soha-surface: #f4ecd8;
-    --soha-badge-bg: #efe4d0;
-    --soha-badge-text: #5b4636;
-    --stat-glow-opacity: 0.2;
-  }
-
-  .theme-high-contrast-dark {
-    --soha-bg: #000000;
-    --soha-text: #ffffff;
-    --soha-card: #000000;
-    --soha-border: #ffffff;
-    --soha-sidebar: #000000;
-    --soha-input-bg: #000000;
-    --soha-hover: #1f1f1f;
-    --soha-muted: #a3a3a3;
-    --soha-surface: #000000;
-    --soha-badge-bg: #262626;
-    --soha-badge-text: #ffffff;
-    --stat-glow-opacity: 0;
-  }
-
-  .accent-blue { --soha-accent: #3b82f6; --soha-accent-light: #60a5fa; --soha-accent-dark: #2563eb; --soha-accent-soft: rgba(59, 130, 246, 0.1); }
-  .accent-green { --soha-accent: #10b981; --soha-accent-light: #34d399; --soha-accent-dark: #059669; --soha-accent-soft: rgba(16, 185, 129, 0.1); }
-  .accent-purple { --soha-accent: #8b5cf6; --soha-accent-light: #a78bfa; --soha-accent-dark: #7c3aed; --soha-accent-soft: rgba(139, 92, 246, 0.1); }
-  .accent-orange { --soha-accent: #f97316; --soha-accent-light: #fb923c; --soha-accent-dark: #ea580c; --soha-accent-soft: rgba(249, 115, 22, 0.1); }
-  .accent-pink { --soha-accent: #ec4899; --soha-accent-light: #f472b6; --soha-accent-dark: #db2777; --soha-accent-soft: rgba(236, 72, 153, 0.1); }
-  .accent-teal { --soha-accent: #14b8a6; --soha-accent-light: #2dd4bf; --soha-accent-dark: #0d9488; --soha-accent-soft: rgba(20, 184, 166, 0.1); }
-
   html {
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -118,12 +28,16 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-4 py-2 rounded-lg font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .btn-primary { @apply btn text-white; background: var(--soha-accent); }
-  .btn-primary:hover { background: var(--soha-accent-dark); }
+  .btn-primary:hover { background: var(--soha-accent-dark); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
   .btn-secondary { @apply btn border focus:ring-slate-400; background: var(--soha-card); color: var(--soha-text); border-color: var(--soha-border); }
-  .btn-secondary:hover { background: var(--soha-hover); }
+  .btn-secondary:hover { background: var(--soha-hover); transform: translateY(-1px); }
 
   .input {
     @apply w-full min-h-[44px] px-3 py-2 border rounded-lg text-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:border-transparent;
@@ -148,6 +62,11 @@
     @apply rounded-xl shadow-sm p-4;
     background: var(--soha-card);
     border: 1px solid var(--soha-border);
+    transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
   }
 
   .badge-lot-ok {

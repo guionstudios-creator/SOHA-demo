@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createMockContainer } from '$lib/mock/mock-container';
+  import StatCard from '$lib/components/atoms/StatCard.svelte';
+  import AlertCard from '$lib/components/molecules/AlertCard.svelte';
+  import Badge from '$lib/components/atoms/Badge.svelte';
+  import Skeleton from '$lib/components/atoms/Skeleton.svelte';
 
   const container = createMockContainer();
   let data: any = $state(null);
@@ -14,63 +18,21 @@
 
 {#if !data}
   <div class="space-y-4">
-    {#each Array(4) as _}
-      <div class="card animate-pulse h-24"></div>
-    {/each}
+    <Skeleton variant="card" count={4} />
   </div>
 {:else}
   <div class="space-y-6" class:opacity-0={!visible} class:opacity-100={visible} style="transition: opacity 0.3s ease;">
-    <!-- Hospital Name -->
     <div>
       <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Estadísticas</h1>
       <p class="text-sm mt-1" style="color: var(--soha-muted);">Hospital Demo Central — Dashboard de inventario</p>
     </div>
 
-    <!-- Stat Cards Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Total Medicamentos -->
-      <div class="card group hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--soha-accent-soft);">
-            <span class="text-lg">💊</span>
-          </div>
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Medicamentos</span>
-        </div>
-        <div class="text-3xl font-bold" style="color: var(--soha-accent);">{data.totalMedicamentos}</div>
-      </div>
-
-      <!-- Stock Total -->
-      <div class="card group hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--lot-ok) 15%, transparent);">
-            <span class="text-lg">📦</span>
-          </div>
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Stock Total</span>
-        </div>
-        <div class="text-3xl font-bold" style="color: var(--lot-ok);">{data.totalUnidades.toLocaleString()}</div>
-      </div>
-
-      <!-- Lotes Críticos -->
-      <div class="card group hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--lot-urgent) 15%, transparent);">
-            <span class="text-lg">⚠️</span>
-          </div>
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Lotes Críticos</span>
-        </div>
-        <div class="text-3xl font-bold" style="color: var(--lot-urgent);">{data.lotesUrgentes}</div>
-      </div>
-
-      <!-- Despachos Hoy -->
-      <div class="card group hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: color-mix(in srgb, var(--soha-accent) 15%, transparent);">
-            <span class="text-lg">🛒</span>
-          </div>
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--soha-muted);">Despachos Hoy</span>
-        </div>
-        <div class="text-3xl font-bold" style="color: var(--soha-accent);">{data.despachosHoy}</div>
-      </div>
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-container">
+      <StatCard icon="pill" label="Medicamentos" value={data.totalMedicamentos} color="var(--soha-accent)" />
+      <StatCard icon="package" label="Stock Total" value={data.totalUnidades.toLocaleString()} color="var(--lot-ok)" />
+      <StatCard icon="alert-circle" label="Lotes Críticos" value={data.lotesUrgentes} color="var(--lot-urgent)" />
+      <StatCard icon="shopping-cart" label="Despachos Hoy" value={data.despachosHoy} color="var(--soha-accent)" />
     </div>
 
     <!-- FEFO Status + Service Distribution -->
@@ -108,13 +70,12 @@
             <span class="font-bold" style="color: var(--lot-expired);">{data.lotesVencidos}</span>
           </div>
         </div>
-        <!-- Visual bar -->
         <div class="mt-4 h-3 rounded-full overflow-hidden flex" style="background: var(--soha-surface);">
           {#if data.totalLotes > 0}
-            <div style="width: {(data.lotesOk / data.totalLotes) * 100}%; background: var(--lot-ok);"></div>
-            <div style="width: {(data.lotesAdvertencia / data.totalLotes) * 100}%; background: var(--lot-warning);"></div>
-            <div style="width: {(data.lotesUrgentes / data.totalLotes) * 100}%; background: var(--lot-urgent);"></div>
-            <div style="width: {(data.lotesVencidos / data.totalLotes) * 100}%; background: var(--lot-expired);"></div>
+            <div style="width: {(data.lotesOk / data.totalLotes) * 100}%; background: var(--lot-ok); transition: width 0.5s ease;"></div>
+            <div style="width: {(data.lotesAdvertencia / data.totalLotes) * 100}%; background: var(--lot-warning); transition: width 0.5s ease;"></div>
+            <div style="width: {(data.lotesUrgentes / data.totalLotes) * 100}%; background: var(--lot-urgent); transition: width 0.5s ease;"></div>
+            <div style="width: {(data.lotesVencidos / data.totalLotes) * 100}%; background: var(--lot-expired); transition: width 0.5s ease;"></div>
           {/if}
         </div>
       </div>
@@ -128,7 +89,7 @@
             <div class="flex items-center gap-3">
               <span class="w-32 text-sm truncate" style="color: var(--soha-muted);">{servicio}</span>
               <div class="flex-1 h-6 rounded overflow-hidden" style="background: var(--soha-surface);">
-                <div class="h-full rounded" style="width: {((cantidad as number) / maxCant) * 100}%; background: var(--soha-accent);"></div>
+                <div class="h-full rounded" style="width: {((cantidad as number) / maxCant) * 100}%; background: var(--soha-accent); transition: width 0.5s ease;"></div>
               </div>
               <span class="w-12 text-right text-sm font-mono font-bold" style="color: var(--soha-text);">{cantidad}</span>
             </div>
@@ -142,14 +103,7 @@
       <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--soha-muted);">Alertas Recientes</h3>
       <div class="space-y-2">
         {#each data.recentAlerts as alert}
-          <div class="flex items-center gap-3 p-3 rounded-lg"
-            style={alert.type === 'urgent'
-              ? 'background: color-mix(in srgb, var(--lot-urgent) 8%, transparent); border: 1px solid color-mix(in srgb, var(--lot-urgent) 30%, transparent);'
-              : 'background: color-mix(in srgb, var(--lot-warning) 8%, transparent); border: 1px solid color-mix(in srgb, var(--lot-warning) 30%, transparent);'}
-          >
-            <span>{alert.type === 'urgent' ? '🔴' : '⚠️'}</span>
-            <span class="text-sm" style="color: {alert.type === 'urgent' ? 'var(--lot-urgent)' : 'var(--lot-warning)'};">{alert.message}</span>
-          </div>
+          <AlertCard type={alert.type} message={alert.message} />
         {/each}
       </div>
     </div>

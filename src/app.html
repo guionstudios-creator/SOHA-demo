@@ -1,10 +1,28 @@
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%233b82f6'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='Inter,sans-serif' font-weight='900'>S</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        var theme = 'night';
+        try {
+          var saved = localStorage.getItem('soha_theme');
+          if (saved) theme = saved;
+        } catch(e) {}
+        var html = document.documentElement;
+        var themes = ['night', 'midday', 'afternoon', 'morning', 'soft-light', 'sepia', 'high-contrast-dark'];
+        themes.forEach(function(t) { html.classList.remove(t, 'theme-' + t); });
+        if (theme === 'night') {
+          html.classList.add('dark');
+        } else {
+          html.classList.remove('dark');
+          html.classList.add('theme-' + theme);
+        }
+      })();
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">

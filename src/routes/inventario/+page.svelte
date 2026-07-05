@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createMockContainer } from '$lib/mock/mock-container';
+  import SearchBar from '$lib/components/molecules/SearchBar.svelte';
+  import Badge from '$lib/components/atoms/Badge.svelte';
+  import Skeleton from '$lib/components/atoms/Skeleton.svelte';
 
   const container = createMockContainer();
   let items: any[] = $state([]);
@@ -13,20 +16,11 @@
     loading = false;
   });
 
-  async function handleSearch() {
+  async function handleSearch(val: string) {
+    searchQuery = val;
     loading = true;
-    items = await container.inventoryService.findAll({ search: searchQuery });
+    items = await container.inventoryService.findAll({ search: val || undefined });
     loading = false;
-  }
-
-  function getLotBadgeClass(status: string): string {
-    switch (status) {
-      case 'ok': return 'badge-lot-ok';
-      case 'warning': return 'badge-lot-warning';
-      case 'urgent': return 'badge-lot-urgent';
-      case 'expired': return 'badge-lot-expired';
-      default: return 'badge-lot-expired';
-    }
   }
 
   function getLotStatusLabel(status: string): string {
@@ -42,35 +36,27 @@
   function daysUntilExpiry(fecha: string): number {
     return Math.ceil((new Date(fecha).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   }
+
+  function toggleRow(item: any) {
+    selectedItem = selectedItem?.id === item.id ? null : item;
+  }
 </script>
 
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Inventario</h1>
-      <p class="text-sm mt-1" style="color: var(--soha-muted);">Stock actual con control FEFO por lote</p>
-    </div>
+  <div>
+    <h1 class="text-2xl font-bold" style="color: var(--soha-text);">Inventario</h1>
+    <p class="text-sm mt-1" style="color: var(--soha-muted);">Stock actual con control FEFO por lote</p>
   </div>
 
-  <!-- Filters -->
   <div class="flex flex-wrap gap-3">
-    <input
-      type="text"
-      bind:value={searchQuery}
-      oninput={handleSearch}
-      placeholder="Buscar medicamento..."
-      class="input flex-1 min-w-[200px]"
-    />
+    <SearchBar placeholder="Buscar medicamento..." value={searchQuery} onSearch={handleSearch} />
   </div>
 
   {#if loading}
     <div class="space-y-3">
-      {#each Array(5) as _}
-        <div class="card animate-pulse h-20"></div>
-      {/each}
+      <Skeleton variant="row" count={5} />
     </div>
   {:else}
-    <!-- Table -->
     <div class="table-container">
       <table class="table">
         <thead>
@@ -85,14 +71,11 @@
         </thead>
         <tbody>
           {#each items as item}
-            <tr
-              class="cursor-pointer"
-              onclick={() => selectedItem = selectedItem?.id === item.id ? null : item}
-            >
+            <tr class="cursor-pointer" onclick={() => toggleRow(item)}>
               <td class="font-medium">{item.nombreComercial}</td>
               <td>{item.principioActivo}</td>
               <td>
-                <span class="font-bold" style="color: item.stockActual < item.stockMinimo ? 'var(--lot-urgent)' : 'var(--lot-ok)';">
+                <span class="font-bold" style="color: {item.stockActual < item.stockMinimo ? 'var(--lot-urgent)' : 'var(--lot-ok)'};">
                   {item.stockActual}
                 </span>
               </td>
@@ -100,18 +83,17 @@
               <td>{item.lotesDetalle.length}</td>
               <td>
                 {#if item.stockActual < item.stockMinimo}
-                  <span class="badge-lot-urgent">Stock bajo</span>
+                  <Badge type="urgent" label="Stock bajo" />
                 {:else if item.lotesDetalle.some((l: any) => l.status === 'urgent')}
-                  <span class="badge-lot-urgent">Crítico</span>
+                  <Badge type="urgent" label="Crítico" />
                 {:else if item.lotesDetalle.some((l: any) => l.status === 'warning')}
-                  <span class="badge-lot-warning">Atención</span>
+                  <Badge type="warning" label="Atención" />
                 {:else}
-                  <span class="badge-lot-ok">Normal</span>
+                  <Badge type="ok" label="Normal" />
                 {/if}
               </td>
             </tr>
 
-            <!-- Expanded lot details -->
             {#if selectedItem?.id === item.id}
               <tr>
                 <td colspan="6" class="!p-0">
@@ -121,7 +103,7 @@
                       {#each item.lotesDetalle as lot}
                         <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--soha-card); border: 1px solid var(--soha-border);">
                           <div class="flex items-center gap-3">
-                            <span class={getLotBadgeClass(lot.status)}>{getLotStatusLabel(lot.status)}</span>
+                            <Badge type={lot.status} label={getLotStatusLabel(lot.status)} />
                             <span class="font-medium text-sm" style="color: var(--soha-text);">{lot.numeroLote}</span>
                           </div>
                           <div class="flex items-center gap-4 text-sm">

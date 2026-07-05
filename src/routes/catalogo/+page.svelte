@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createMockContainer } from '$lib/mock/mock-container';
+  import SearchBar from '$lib/components/molecules/SearchBar.svelte';
+  import Badge from '$lib/components/atoms/Badge.svelte';
+  import Skeleton from '$lib/components/atoms/Skeleton.svelte';
 
   const container = createMockContainer();
   let medications: any[] = $state([]);
@@ -18,7 +21,7 @@
   async function handleSearch() {
     loading = true;
     const all = await container.catalogService.findAllMedications();
-    medications = all.filter(m => {
+    medications = all.filter((m: any) => {
       const matchSearch = !searchQuery || m.nombreComercial.toLowerCase().includes(searchQuery.toLowerCase()) || m.principioActivo.toLowerCase().includes(searchQuery.toLowerCase());
       const matchCat = !selectedCategory || m.categoria === selectedCategory;
       return matchSearch && matchCat;
@@ -26,14 +29,14 @@
     loading = false;
   }
 
-  function getCatColor(cat: string): string {
-    const map: Record<string, string> = {
-      'Analgésicos': 'badge-lot-ok',
-      'Antibióticos': 'badge-lot-warning',
-      'Cardiovasculares': 'badge-lot-urgent',
-      'Emergencia': 'badge-lot-urgent',
+  function getCatBadgeType(cat: string): 'ok' | 'warning' | 'urgent' | 'expired' {
+    const map: Record<string, 'ok' | 'warning' | 'urgent' | 'expired'> = {
+      'Analgésicos': 'ok',
+      'Antibióticos': 'warning',
+      'Cardiovasculares': 'urgent',
+      'Emergencia': 'urgent',
     };
-    return map[cat] || 'badge-lot-expired';
+    return map[cat] || 'expired';
   }
 </script>
 
@@ -44,7 +47,7 @@
   </div>
 
   <div class="flex flex-wrap gap-3">
-    <input type="text" bind:value={searchQuery} oninput={handleSearch} placeholder="Buscar por nombre o principio activo..." class="input flex-1 min-w-[250px]" />
+    <SearchBar placeholder="Buscar por nombre o principio activo..." value={searchQuery} onSearch={(val) => { searchQuery = val; handleSearch(); }} />
     <select bind:value={selectedCategory} onchange={handleSearch} class="input w-auto">
       <option value="">Todas las categorías</option>
       {#each categories as cat}
@@ -55,9 +58,7 @@
 
   {#if loading}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {#each Array(6) as _}
-        <div class="card animate-pulse h-48"></div>
-      {/each}
+      <Skeleton variant="card" count={6} />
     </div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -68,7 +69,7 @@
               <h3 class="font-semibold" style="color: var(--soha-text);">{med.nombreComercial}</h3>
               <p class="text-sm" style="color: var(--soha-muted);">{med.principioActivo}</p>
             </div>
-            <span class={getCatColor(med.categoria)}>{med.categoria}</span>
+            <Badge type={getCatBadgeType(med.categoria)} label={med.categoria} />
           </div>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">

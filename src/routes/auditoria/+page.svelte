@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createMockContainer } from '$lib/mock/mock-container';
+  import Badge from '$lib/components/atoms/Badge.svelte';
+  import Skeleton from '$lib/components/atoms/Skeleton.svelte';
 
   const container = createMockContainer();
   let entries: any[] = $state([]);
@@ -20,13 +22,13 @@
     loading = false;
   }
 
-  function getOpClass(op: string): string {
+  function getOpType(op: string): 'ok' | 'warning' | 'urgent' | 'expired' {
     switch (op) {
-      case 'INSERT': return 'badge-lot-ok';
-      case 'UPDATE': return 'badge-lot-warning';
-      case 'DELETE': return 'badge-lot-urgent';
-      case 'LOGIN': return 'badge-lot-expired';
-      default: return 'badge-lot-expired';
+      case 'INSERT': return 'ok';
+      case 'UPDATE': return 'warning';
+      case 'DELETE': return 'urgent';
+      case 'LOGIN': return 'expired';
+      default: return 'expired';
     }
   }
 </script>
@@ -48,9 +50,7 @@
 
   {#if loading}
     <div class="space-y-2">
-      {#each Array(10) as _}
-        <div class="card animate-pulse h-14"></div>
-      {/each}
+      <Skeleton variant="row" count={8} />
     </div>
   {:else}
     <div class="table-container">
@@ -68,7 +68,7 @@
           {#each entries as entry}
             <tr>
               <td class="font-mono text-xs">{entry.fechaHora}</td>
-              <td><span class={getOpClass(entry.operacion)}>{entry.operacion}</span></td>
+              <td><Badge type={getOpType(entry.operacion)} label={entry.operacion} /></td>
               <td>{entry.username}</td>
               <td style="color: var(--soha-muted);">{entry.contexto}</td>
               <td class="font-mono text-xs" style="color: var(--soha-muted);">{entry.hash}</td>

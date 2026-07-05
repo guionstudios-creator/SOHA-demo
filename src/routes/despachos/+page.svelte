@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createMockContainer } from '$lib/mock/mock-container';
+  import Badge from '$lib/components/atoms/Badge.svelte';
+  import Skeleton from '$lib/components/atoms/Skeleton.svelte';
 
   const container = createMockContainer();
   let dispatches: any[] = $state([]);
@@ -20,12 +22,12 @@
     loading = false;
   }
 
-  function getEstadoClass(estado: string): string {
+  function getEstadoType(estado: string): 'ok' | 'warning' | 'urgent' {
     switch (estado) {
-      case 'completada': return 'badge-lot-ok';
-      case 'pendiente': return 'badge-lot-warning';
-      case 'cancelada': return 'badge-lot-urgent';
-      default: return 'badge-lot-expired';
+      case 'completada': return 'ok';
+      case 'pendiente': return 'warning';
+      case 'cancelada': return 'urgent';
+      default: return 'expired' as any;
     }
   }
 </script>
@@ -47,9 +49,7 @@
 
   {#if loading}
     <div class="space-y-3">
-      {#each Array(5) as _}
-        <div class="card animate-pulse h-24"></div>
-      {/each}
+      <Skeleton variant="card" count={5} />
     </div>
   {:else}
     <div class="space-y-3">
@@ -59,7 +59,7 @@
             <div>
               <div class="flex items-center gap-3 mb-2">
                 <span class="font-mono text-sm font-bold" style="color: var(--soha-accent);">{dispatch.codigoTrazabilidad}</span>
-                <span class={getEstadoClass(dispatch.estado)}>{dispatch.estado}</span>
+                <Badge type={getEstadoType(dispatch.estado)} label={dispatch.estado} />
               </div>
               <div class="text-sm" style="color: var(--soha-muted);">
                 {dispatch.fecha} · {dispatch.servicio} · {dispatch.usuario}
