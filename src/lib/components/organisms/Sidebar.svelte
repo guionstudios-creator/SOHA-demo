@@ -13,17 +13,17 @@
 
   const navOperativo = [
     { href: '/', icon: 'layout-dashboard', label: 'Estadísticas' },
-    { href: '/inventario', icon: 'warehouse', label: 'Inventario' },
-    { href: '/despachos', icon: 'truck', label: 'Salida Rápida' },
-    { href: '/devoluciones', icon: 'undo-2', label: 'Devoluciones' },
-    { href: '/historial', icon: 'history', label: 'Historial' },
-    { href: '/reportes', icon: 'file-bar-chart', label: 'Reportes' },
+    { href: '/inventario/', icon: 'warehouse', label: 'Inventario' },
+    { href: '/despachos/', icon: 'truck', label: 'Salida Rápida' },
+    { href: '/devoluciones/', icon: 'undo-2', label: 'Devoluciones' },
+    { href: '/historial/', icon: 'history', label: 'Historial' },
+    { href: '/reportes/', icon: 'file-bar-chart', label: 'Reportes' },
   ];
 
   const navAdmin = [
-    { href: '/catalogo', icon: 'list', label: 'Catálogo' },
-    { href: '/usuarios', icon: 'users', label: 'Usuarios' },
-    { href: '/auditoria', icon: 'shield', label: 'Auditoría' },
+    { href: '/catalogo/', icon: 'list', label: 'Catálogo' },
+    { href: '/usuarios/', icon: 'users', label: 'Usuarios' },
+    { href: '/auditoria/', icon: 'shield', label: 'Auditoría' },
   ];
 
   onMount(() => {
