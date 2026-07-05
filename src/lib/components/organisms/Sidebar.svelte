@@ -46,9 +46,9 @@
 </script>
 
 {#if !layoutReady}
-  <div class="fixed inset-0 bg-slate-50 flex flex-col items-center justify-center gap-4">
-    <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-    <p class="text-slate-500 font-medium animate-pulse">Iniciando SOHA...</p>
+  <div class="fixed inset-0 flex flex-col items-center justify-center gap-4" style="background: var(--soha-bg);">
+    <div class="w-12 h-12 border-4 rounded-full animate-spin" style="border-color: var(--soha-border); border-top-color: var(--soha-accent);"></div>
+    <p class="font-medium animate-pulse" style="color: var(--soha-muted);">Iniciando SOHA...</p>
   </div>
 {:else}
   <div class="layout-root">
@@ -56,8 +56,8 @@
     <aside class="sb-root" class:sb-expanded={isExpanded} class:sb-collapsed={!isExpanded}>
       <!-- Header -->
       <div class="sb-header">
-        <a href="/" class="sb-logo-wrapper flex items-center gap-0 rounded-xl transition-colors" style="padding: 0.5rem;">
-          <div class="sb-logo-box">S</div>
+        <a href="/" class="sb-logo-wrapper" style="display: flex; align-items: center; gap: 0; border-radius: 0.75rem; transition: color 0.3s; text-decoration: none;">
+          <div class="sb-logo-box" class:sb-logo-box-centered={!isExpanded}>S</div>
           {#if isExpanded}
             <div class="sb-label-slide sb-label-visible">
               <div class="sb-logo-text">
@@ -80,7 +80,7 @@
             class="sb-link"
             class:sb-link-active={isRouteActive(item.href)}
           >
-            <div class="sb-icon-box" class:sb-link-active={isRouteActive(item.href)}>
+            <div class="sb-icon-box">
               <Icon name={item.icon} size={18} />
             </div>
             {#if isExpanded}
@@ -107,7 +107,7 @@
             class="sb-link"
             class:sb-link-active={isRouteActive(item.href)}
           >
-            <div class="sb-icon-box" class:sb-link-active={isRouteActive(item.href)}>
+            <div class="sb-icon-box">
               <Icon name={item.icon} size={18} />
             </div>
             {#if isExpanded}
@@ -123,7 +123,7 @@
       <div class="sb-footer">
         <div class="sb-profile-card">
           <div class="sb-profile-main">
-            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">AD</div>
+            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style="background: var(--soha-accent); color: white;">AD</div>
             {#if isExpanded}
               <div class="sb-label-slide sb-label-visible">
                 <div class="sb-profile-info">
@@ -133,10 +133,10 @@
               </div>
             {/if}
           </div>
-          <div class="flex items-center gap-1">
+          <div class="sb-profile-actions">
             <ThemeToggle />
             <button class="sb-action-btn sb-action-btn-expand" onclick={toggleExpand} title={isExpanded ? 'Contraer' : 'Expandir'}>
-              {isExpanded ? '◀' : '▶'}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
           </div>
         </div>
@@ -146,25 +146,21 @@
     <!-- Main Content -->
     <div class="layout-main-wrapper">
       <!-- Desktop status strip -->
-      <div
-        class="hidden lg:flex items-center justify-end gap-2 px-6 py-2 border-b shrink-0"
-        style="background: color-mix(in srgb, var(--soha-bg) 60%, transparent); border-color: var(--soha-border);"
-      >
-        <span class="flex items-center gap-1.5 text-xs" style="color: var(--soha-muted);">
-          <span class="w-2 h-2 rounded-full" style="background: var(--lot-ok);"></span>
+      <div class="status-strip">
+        <span class="status-indicator" style="color: var(--soha-muted);">
+          <span class="status-dot" style="background: var(--lot-ok);"></span>
           Conectado
         </span>
-        <span class="text-xs" style="color: var(--soha-border);">|</span>
+        <span class="status-separator" style="color: var(--soha-border);">|</span>
         <span class="text-xs" style="color: var(--soha-muted);">Hospital Demo Central</span>
       </div>
 
       <!-- Content -->
       <main class="flex-1 overflow-y-auto w-full relative p-6 lg:p-8 page-enter">
         <!-- Demo Banner -->
-        <div class="mb-6 px-4 py-3 rounded-lg border text-sm font-medium flex items-center gap-3"
-          style="background: color-mix(in srgb, var(--lot-warning) 10%, transparent); border-color: color-mix(in srgb, var(--lot-warning) 30%, transparent); color: var(--lot-warning);">
-          <span>⚠️</span>
-          <span>DEMO — Todos los datos son ficticios. No representa información real de pacientes o instituciones.</span>
+        <div class="demo-banner mb-6">
+          <span class="demo-banner-icon">&#x1f6a7;</span>
+          <span><strong>Demo</strong> — Todos los datos son ficticios. No representa información real de pacientes o instituciones.</span>
         </div>
 
         {@render children()}
@@ -174,19 +170,50 @@
 {/if}
 
 <style>
-  .sb-nav-section-label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--soha-muted);
-    padding: 1rem 0.5rem 0.25rem;
-    white-space: nowrap;
-    overflow: hidden;
+  .status-strip {
+    display: none;
   }
-  .sb-hidden {
-    opacity: 0;
-    width: 0;
-    padding: 0;
+  @media (min-width: 1024px) {
+    .status-strip {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      border-bottom: 1px solid var(--soha-border);
+      background: color-mix(in srgb, var(--soha-bg) 60%, transparent);
+      flex-shrink: 0;
+    }
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+  }
+
+  .status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .status-separator {
+    font-size: 0.75rem;
+  }
+
+  .sb-profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+  .sb-collapsed .sb-profile-actions {
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .sb-logo-box-centered {
+    margin: 0 auto;
   }
 </style>

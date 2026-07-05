@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { ComponentType, SvelteComponent } from 'svelte';
-
   interface Column {
     key: string;
     label: string;
@@ -16,28 +14,23 @@
   } = $props();
 </script>
 
-<div
-  style="width: 100%; overflow-x: auto; border-radius: 0.75rem; border: 1px solid var(--soha-border);"
-  class={className}
->
-  <table style="width: 100%; font-size: 0.875rem; text-align: left; border-collapse: collapse;">
+<div class="table-container {className}">
+  <table class="table">
     <thead>
-      <tr style="background: var(--soha-surface); color: var(--soha-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+      <tr>
         {#each columns as col}
-          <th style="padding: 0.75rem 1rem; font-weight: 500; white-space: nowrap;" class={col.class}>{col.label}</th>
+          <th class={col.class}>{col.label}</th>
         {/each}
       </tr>
     </thead>
     <tbody>
       {#each rows as row, i}
         <tr
-          style="border-top: 1px solid var(--soha-border); transition: background 0.15s; cursor: pointer;"
+          class="table-row"
           onclick={() => onRowClick(row)}
-          onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--soha-hover)'; }}
-          onmouseleave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; }}
         >
           {#each columns as col}
-            <td style="padding: 0.75rem 1rem; color: var(--soha-text); vertical-align: middle;">
+            <td>
               {#if col.render}
                 {@const rendered = col.render(row)}
                 {#if rendered}
@@ -49,10 +42,23 @@
             </td>
           {/each}
         </tr>
-        {#if i < rows.length - 1}
-          <tr style="border-top: 1px solid var(--soha-border);"><td colspan={columns.length} style="padding: 0;"></td></tr>
-        {/if}
       {/each}
     </tbody>
   </table>
 </div>
+
+<style>
+  .table-row {
+    border-top: 1px solid var(--soha-border);
+    transition: background 0.15s ease;
+    cursor: pointer;
+  }
+  .table-row:hover {
+    background: var(--soha-hover);
+  }
+  .table-row td {
+    padding: 0.75rem 1rem;
+    color: var(--soha-text);
+    vertical-align: middle;
+  }
+</style>

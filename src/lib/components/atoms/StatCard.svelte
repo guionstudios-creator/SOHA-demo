@@ -12,18 +12,81 @@
   const softColor = $derived(`color-mix(in srgb, ${color} 15%, transparent)`);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class={className}
-  style="background: var(--soha-card); border: 1px solid var(--soha-border); border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: box-shadow 0.2s ease;"
-  onmouseenter={(e) => (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
-  onmouseleave={(e) => (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'}
+  class="stat-card {className}"
+  style="--stat-color: {color}; --stat-soft: {softColor};"
 >
-  <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-    <div style="width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: {softColor};">
+  <div class="stat-card-header">
+    <div class="stat-card-icon" style="background: var(--stat-soft);">
       <Icon name={icon} size={18} color={color} />
     </div>
-    <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--soha-muted);">{label}</span>
+    <span class="stat-card-label">{label}</span>
   </div>
-  <div style="font-size: 1.875rem; font-weight: 700; line-height: 1; color: {color};">{value}</div>
+  <div class="stat-card-value" style="color: {color};">{value}</div>
 </div>
+
+<style>
+  .stat-card {
+    background: var(--soha-card);
+    border: 1px solid var(--soha-border);
+    border-radius: 0.875rem;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stat-color) 20%, transparent);
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px -8px rgba(0,0,0,0.15), 0 0 0 1px color-mix(in srgb, var(--stat-color) 15%, transparent);
+  }
+  .stat-card:active {
+    transform: translateY(-1px);
+  }
+  .stat-card:hover::after {
+    opacity: 1;
+  }
+
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .stat-card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .stat-card-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--soha-muted);
+  }
+
+  .stat-card-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+</style>
