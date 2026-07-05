@@ -334,6 +334,21 @@
   .sb-action-btn-expand { color: var(--soha-muted); }
   .sb-action-btn-expand:hover { color: var(--soha-accent); }
   .sb-collapsed .sb-action-btn-expand { transform: rotate(180deg); }
+  .sb-collapsed .sb-action-btn {
+    background: var(--soha-surface);
+    border: 1px solid var(--soha-border);
+  }
+  .sb-collapsed .sb-action-btn-expand {
+    color: var(--soha-accent);
+    width: 36px;
+    height: 36px;
+    border-radius: 0.625rem;
+  }
+  .sb-collapsed .sb-action-btn-expand:hover {
+    background: var(--soha-accent);
+    color: white;
+    border-color: var(--soha-accent);
+  }
 }
 
 /* ── Demo Banner Override ── */
